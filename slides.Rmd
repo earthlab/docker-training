@@ -1,0 +1,328 @@
+---
+title: "Docker for science"
+subtitle: "Earth Lab Data Meetup\nhttps://github.com/earthlab/docker-training"
+author: "Max Joseph"
+institute: Earth Lab Analytics Hub, University of Colorado Boulder
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  beamer_presentation:
+    latex_engine: xelatex
+    fonttheme: "structurebold"
+    highlight: haddock
+    fig_caption: false
+    keep_tex: true
+header-includes: 
+- \usepackage{graphicx}
+- \beamertemplatenavigationsymbolsempty
+- \usepackage{fontspec}
+- \setsansfont{DejaVu Sans}
+- \usepackage{xcolor}
+- \definecolor{foreground}{RGB}{0,0,0}
+- \definecolor{background}{RGB}{255,255,255}
+- \definecolor{title}{RGB}{66,134,244}
+- \definecolor{gray}{RGB}{65,65,65}
+- \definecolor{subtitle}{RGB}{0,150,150}
+- \definecolor{hilight}{RGB}{102,255,204}
+- \definecolor{vhilight}{RGB}{255,111,207}
+- \setbeamercolor{titlelike}{fg=title}
+- \setbeamercolor{subtitle}{fg=subtitle}
+- \setbeamercolor{institute}{fg=gray}
+- \setbeamercolor{normal text}{fg=foreground,bg=background}
+- \setbeamercolor{local structure}{fg=title}
+- \setbeamercolor{block title}{fg=subtitle}
+- \setbeamertemplate{frametitle}{\begin{centering} \insertframetitle \par \end{centering}}
+- \setmonofont[Scale=0.8]{DejaVu Sans Mono}
+- \usepackage[normalem]{ulem}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Science needs software
+
+Software needs to run somewhere
+
+1. Your computer
+
+2. Someone else's computer
+
+- your neighbor
+- the cloud (Amazon Web Services, Summit, Janus)
+
+
+# What does it take to reproduce an analysis?
+
+# 1. **Install dependencies**
+
+And dependencies of dependencies...
+
+![](https://c1.staticflickr.com/2/1648/25268606502_3cf903c8a8_b.jpg)
+
+# 2. **Acquire data**
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Diskette_box_%282%29.jpg/675px-Diskette_box_%282%29.jpg)
+
+
+# 3. **Run software in same way as author**
+
+
+### Best case: automated process
+
+- `R CMD BATCH main.R` 
+- `R -e "rmarkdown::render('main.Rmd')"`
+- `python main.py`
+- `jupyter nbconvert --to notebook --execute main.ipynb`
+- `make`
+
+### Worst case: manual steps taken in a GUI
+
+- Excel
+- ArcGIS
+- Adobe Illustrator
+- Clicking around in RStudio, PyCharm, etc.
+
+# 
+
+### What would take the longest if trying to reproduce your work?
+
+A. Install dependencies
+
+B. Acquire data
+
+C. Run software in exactly the same way as original
+
+
+# What is Docker?
+
+Docker wraps software in a filesystem that **contains everything needed to run**
+
+![](https://d3nmt5vlzunoa1.cloudfront.net/phpstorm/files/2015/10/large_v-trans.png)
+
+# Docker images
+
+**Image** = filesystem + parameters to use at runtime
+
+- stateless
+- immutable
+
+# Docker containers
+
+**Image** = filesystem + parameters to use at runtime
+
+**Container** = one instance of an image
+
+
+# Images vs. containers
+
+**Images** $\approx$ steel molds
+
+**Containers** $\approx$ molded plastic
+
+![Mold-o-rama](https://c2.staticflickr.com/6/5518/11633279103_c141a7d08c_b.jpg)
+
+# Using a Docker image
+
+*Assuming Docker is installed*
+
+```bash
+docker run hello-world
+```
+
+# Using a Docker image interactively
+
+```bash
+docker run -i -t ubuntu
+```
+
+What are these flags? 
+
+- -i: interactive mode
+- -t: terminal session (virtual teletype)
+
+# Where are these images coming from? 
+
+DockerHub: a centralized repository of Docker images
+
+![](https://c1.staticflickr.com/1/764/22468805072_941b892fde_b.jpg)
+
+# Some prebuilt environments for Earth Lab
+
+https://hub.docker.com/u/earthlab
+
+# Roll your own Docker image
+
+Need to create a `Dockerfile` 
+
+- specifies starting point
+- executes Linux commands to install software
+- bundles your code and data (possibly)
+- runs some command
+
+# Make your own Docker image
+
+1. Choose a starting point
+
+**Publicly curated**
+
+https://hub.docker.com/
+
+
+# Make your own Docker image
+
+1. Choose a starting point
+
+```bash
+FROM r-base
+
+...
+```
+
+# Make your own Docker image
+
+1. Choose a starting point
+
+2. Install dependencies
+
+```bash
+...
+RUN apt-get update 
+RUN apt-get -y install gdal-bin libgdal-dev libproj-dev
+RUN R -e "install.packages('rasterVis', 
+            repos='http://cran.us.r-project.org')"
+...
+```
+
+
+# Make your own Docker image
+
+1. Choose a starting point
+
+2. Install dependencies
+
+3. Copy your files into the container
+
+```bash
+...
+COPY . /usr/local/src/myscripts
+WORKDIR /usr/local/src/myscripts
+...
+```
+
+**Notes** 
+
+- This copy happens every time your container is run
+- `.` specifies to copy *all* of the files in the host's directory
+
+
+# More on COPY
+
+`COPY` is useful to:
+
+- ensure project, run elsewhere, has same files
+- minimize image size
+- separate **code and data** from the **dependencies**
+
+
+# Docker for a scientific project
+
+```bash
+|-- my-project/
+    |-- README.md
+    |-- Dockerfile
+    |-- data/
+    |-- R/
+    |-- python/
+    |-- output/
+    |-- paper/
+```
+
+**Question**
+
+What happens when you run:
+
+```
+COPY . /dir/in/container/
+```
+
+
+# Make your own Docker image
+
+1. Choose a starting point
+
+2. Install dependencies
+
+3. Copy your files into the container
+
+4. Run your command
+
+```bash
+...
+CMD ["Rscript", "some-script.R"]
+```
+
+# Final Dockerfile
+
+```{bash, echo = FALSE}
+grep -o '^[^#]*' example/Dockerfile
+```
+
+# Make your own Docker image
+
+```bash
+docker build -t my-project path/to/my-project/
+```
+
+- `-t` specifies a "tag" or name
+- `/path/to/my-project/` must point to the location of `Dockerfile`
+
+# Running the container
+
+To run your container:
+
+```bash
+docker run my-project
+```
+
+# Why didn't we get the plot?
+
+The container is contained!
+
+- the files in the container are not shared
+- our filesystem $\neq$ the container filesystem
+
+# Sharing volumes
+
+We need a connection between our filesystem and the container
+
+- `-v` flag shares volumes
+
+*Syntax*
+
+```bash
+docker run -v /your/local/path:/path/in/container/ some-image
+```
+
+# Volume sharing example
+
+```bash
+docker run -v $(pwd):/home/docker/ my-project
+```
+
+- trick: use `$(pwd)` to substitute in your current working directory
+
+
+# Recap
+
+1. Science needs software
+2. Docker bundles your software
+3. Docker makes your analysis **portable** and **reproducible**
+
+**Code**
+
+https://github.com/earthlab/docker-training
+
+**Reading**
+
+- An introduction to Docker for reproducible research, with examples from the R environment, Carl Boettiger https://arxiv.org/abs/1410.0846
+- How to get started with data science in containers, Jamie Hall http://blog.kaggle.com/2016/02/05/how-to-get-started-with-data-science-in-containers/
