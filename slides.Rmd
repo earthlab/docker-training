@@ -138,6 +138,8 @@ Docker wraps software in a filesystem that **contains everything needed to run**
 docker run hello-world
 ```
 
+*Demo*
+
 # Using a Docker image interactively
 
 ```bash
@@ -149,6 +151,8 @@ What are these flags?
 - -i: interactive mode
 - -t: terminal session (virtual teletype)
 
+*Demo*
+
 # Where are these images coming from? 
 
 DockerHub: a centralized repository of Docker images
@@ -158,6 +162,8 @@ DockerHub: a centralized repository of Docker images
 # Some prebuilt environments for Earth Lab
 
 https://hub.docker.com/u/earthlab
+
+*Demo*
 
 # Roll your own Docker image
 
@@ -186,6 +192,8 @@ FROM r-base
 
 ...
 ```
+
+*Demo: some-script.R*
 
 # Make your own Docker image
 
@@ -285,6 +293,8 @@ docker build -t my-project path/to/my-project/
 - `-t` specifies a "tag" or name
 - `/path/to/my-project/` must point to the location of `Dockerfile`
 
+*Demo*
+
 # Running the container
 
 To run your container:
@@ -292,6 +302,8 @@ To run your container:
 ```bash
 docker run my-project
 ```
+
+*Demo*
 
 # Why didn't we get the plot?
 
@@ -319,6 +331,8 @@ docker run -v $(pwd):/home/docker/ my-project
 ```
 
 - trick: use `$(pwd)` to substitute in your current working directory
+
+*Demo*
 
 
 # Recap
