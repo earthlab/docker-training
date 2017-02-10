@@ -10,7 +10,6 @@ output:
     fonttheme: "structurebold"
     highlight: haddock
     fig_caption: false
-    keep_tex: true
 header-includes: 
 - \usepackage{graphicx}
 - \beamertemplatenavigationsymbolsempty
@@ -98,6 +97,16 @@ C. Run software in exactly the same way as original
 Docker wraps software in a filesystem that **contains everything needed to run**
 
 ![](https://d3nmt5vlzunoa1.cloudfront.net/phpstorm/files/2015/10/large_v-trans.png)
+
+# Original motivation: the matrix of hell
+
+![](http://pointful.github.io/docker-intro/docker-img/the-matrix-from-hell.png)
+
+
+# Academic matrix of hell
+
+![](academic-matrix-of-hell.pdf)
+
 
 # Docker images
 
@@ -263,8 +272,8 @@ CMD ["Rscript", "some-script.R"]
 
 # Final Dockerfile
 
-```{bash, echo = FALSE}
-grep -o '^[^#]*' example/Dockerfile
+```{r comment=''}
+cat(readLines('example/Dockerfile'), sep = '\n')
 ```
 
 # Make your own Docker image
