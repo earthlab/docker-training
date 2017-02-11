@@ -39,7 +39,7 @@ docker run -v $(pwd):/home/docker/ some-image
 ```
 
 The `-v` flag links volumes between the host (your computer) and the container. 
-The `$(pwd) bit will automatically substitute your current working directory.
+The `$(pwd)` bit will automatically substitute your current working directory.
 
 
 ## Making the slides
